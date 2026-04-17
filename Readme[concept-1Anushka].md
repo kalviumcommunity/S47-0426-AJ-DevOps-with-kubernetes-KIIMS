@@ -112,9 +112,15 @@ Kubernetes runs the Docker image inside the cluster using a **Deployment** resou
 **A Deployment specifies:**
 ```yaml
 # Conceptual Kubernetes Deployment
-image: my-app:commit-9f3a1c2
-replicas: 3
-strategy: RollingUpdate
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+  template:
+    spec:
+      containers:
+      - name: app
+        image: app:commit-9f3a1c2
 ```
 
 **What Kubernetes does:**
