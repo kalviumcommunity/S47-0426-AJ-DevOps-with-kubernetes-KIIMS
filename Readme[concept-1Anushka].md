@@ -54,7 +54,6 @@ app:v1.3.2
 app:commit-9f3a1c2
 ```
 
-> The CI pipeline does **not** deploy code — it **produces** a Docker image artifact. Deployment is a separate, controlled step.
 
 ---
 
