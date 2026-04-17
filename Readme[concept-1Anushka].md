@@ -11,19 +11,14 @@ In DevOps, code is never deployed directly. Every change is packaged into an **i
 ## Flow Diagram
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                                                             │
-│   [SOURCE]          [CI]           [IMAGE]                  │
-│                                                             │
-│  Git Commit  ──►  CI Pipeline  ──►  Docker Image           │
-│  (git push)       (build/test)      (tagged artifact)       │
-│                                                             │
-│      [REGISTRY]              [CLUSTER]                      │
-│                                                             │
-│  Container Registry  ──►  Kubernetes Deployment            │
-│  (versioned store)         (pulls & runs image)            │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────┐
+│                                                                          │
+│  [SOURCE]  ──►  [CI]  ──►  [IMAGE]  ──►  [REGISTRY]  ──►  [CLUSTER]      │
+│                                                                          │
+│  Git Commit    Pipeline    Docker Image    Registry      Deployment      │
+│  (git push)    (build)     (artifact)      (store)       (run)           │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
 ```
 
 **Stages:** `Source` → `CI` → `Image` → `Registry` → `Cluster`
