@@ -280,6 +280,6 @@ Every step is observable. Every failure state has a name. Every name points to a
 | **Readiness Probe** | Detects unready containers | Removes pod from traffic on failure |
 | **Startup Probe** | Handles slow-starting apps | Delays liveness checks until app is ready |
 | **Resource Requests** | Scheduling input | Determines which node a pod lands on |
-| **Resource Limits** | Runtime enforcement | Throttles CPU; kills pod on memory breach |
+| **Resource Limits** | Runtime enforcement | Throttles CPU; kills container on memory breach |
 
 ---
