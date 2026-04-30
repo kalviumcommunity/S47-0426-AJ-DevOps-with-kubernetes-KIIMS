@@ -230,7 +230,7 @@ Kubernetes automatically responds to failures at multiple levels.
 │                                                              │
 │  Failure                    Kubernetes Response              │
 │  ───────                    ────────────────────             │
-│  Pod crashes          →     ReplicaSet creates replacement   │
+│  Pod is deleted       →     ReplicaSet creates replacement   │
 │  Node fails           →     Pods rescheduled to other nodes  │
 │  Readiness fails      →     Pod removed from load balancer   │
 │  Liveness fails       →     Container restarted              │
