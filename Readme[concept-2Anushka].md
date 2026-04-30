@@ -178,7 +178,7 @@ Every pod can declare how much CPU and memory it needs. These values directly af
 | Resource | Limit Exceeded | Result |
 |---|---|---|
 | CPU | Yes | Pod is **throttled** — slowed down, not killed |
-| Memory | Yes | Pod is **OOMKilled** — terminated immediately |
+| Memory | Yes | Container is **OOMKilled** — terminated immediately |
 
 **What happens when requests are too high:**
 
