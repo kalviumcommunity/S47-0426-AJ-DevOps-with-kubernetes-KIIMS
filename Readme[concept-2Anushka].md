@@ -74,7 +74,7 @@ replicas: 3
 
 | Event | ReplicaSet Response |
 |---|---|
-| A pod crashes | Creates a replacement pod |
+| Pod is deleted or Node fails | Creates a replacement pod |
 | A node fails | Reschedules pods onto healthy nodes |
 | `replicas` increased | Starts additional pods |
 | `replicas` decreased | Terminates excess pods |
