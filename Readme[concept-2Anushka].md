@@ -87,7 +87,7 @@ Pod crashes → ReplicaSet detects count = 2
 New pod created → count restored to 3
 ```
 
-> ReplicaSets do not fix broken application code. They ensure the right *number* of pods exist. If your app crashes on startup, the ReplicaSet will keep recreating it — which leads to `CrashLoopBackOff`.
+> ReplicaSets do not fix broken application code. They ensure the right *number* of pods exist. If your app crashes on startup, the **kubelet** will keep restarting the container — which leads to CrashLoopBackOff.
 
 ---
 
