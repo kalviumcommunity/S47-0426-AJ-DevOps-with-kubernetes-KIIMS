@@ -72,6 +72,8 @@ helm version
 version.BuildInfo{Version:"v4.1.4", GitCommit:"05fa37973dc9e42b76e1d2883494c87174b6074f", GitTreeState:"clean", GoVersion:"go1.25.9", KubeClientVersion:"v1.35"}
 ```
 
+> **Note:** The `KubeClientVersion` field in `helm version` reflects the version of the Kubernetes client library that Helm was compiled against — it is independent of the `kubectl` binary installed on the system. This is expected and does not indicate a conflict; both `kubectl` (v1.34.1) and this Helm build (compiled against the v1.35 client library) can communicate correctly with the v1.34.3 cluster because Kubernetes follows a [client/server version skew policy](https://kubernetes.io/releases/version-skew-policy/) that allows minor version differences.
+
 ### curl
 ```
 curl.exe --version
