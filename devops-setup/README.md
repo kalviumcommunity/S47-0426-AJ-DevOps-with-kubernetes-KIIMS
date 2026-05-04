@@ -85,18 +85,11 @@ Features: alt-svc AsynchDNS HSTS HTTPS-proxy IDN IPv6 ...
 
 ## Screenshots
 
-All terminal screenshots are in the [`screenshots/`](./screenshots/) folder.
+The currently available screenshot proof is in the [`screenshots/`](./screenshots/) folder.
 
 | File | What It Shows |
 |---|---|
-| `01-git-version.png` | `git --version` output |
-| `02-docker-version.png` | `docker --version` output |
-| `03-docker-hello-world.png` | `docker run hello-world` successful output |
-| `04-kubectl-version.png` | `kubectl version --client` output |
-| `05-kubectl-get-nodes.png` | `kubectl get nodes` — node Ready |
-| `06-kubectl-cluster-info.png` | `kubectl cluster-info` output |
-| `07-helm-version.png` | `helm version` output |
-| `08-curl-version.png` | `curl.exe --version` output |
+| `Screenshot (291).png` | Terminal screenshot proof currently present in the repository |
 
 ---
 
