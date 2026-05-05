@@ -474,14 +474,14 @@ The `x` in position 4 confirms the owner can now execute the file.
 In CI/CD pipelines, files are often created by one user (e.g., the CI runner as
 `root`) and executed by another (e.g., the app container as `appuser`). Without
 explicit `chown` and `chmod` steps in the pipeline, permission mismatches are
-inevitable. The `Dockerfile` in this project addresses this by:
+inevitable. The `Dockerfile` in this project partially mitigates this by:
 
 1. Creating a dedicated `appuser` with `useradd`
 2. Switching to `USER appuser` before the `CMD`
-3. Using `COPY --chown=appuser:appuser` to set ownership at copy time
 
 This ensures the running process never has more privileges than it needs
-(principle of least privilege).
+(principle of least privilege), but because files are copied without
+`COPY --chown=...`, ownership must still be handled separately when needed.
 
 ---
 
