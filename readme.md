@@ -10,6 +10,7 @@
 - [Concept 2 — Kubernetes Application Lifecycle](docs/Readme[concept-2Anushka].md)
 - [Concept 3 — CI/CD Pipeline Responsibilities](docs/Readme[concept-3Anushka].md)
 - [Containerization Concepts — Why Containers Exist and How They Apply to This Project](docs/containerization-concepts.md)
+- [Docker Architecture — Images, Layers, and Containers](docs/docker-architecture-images-layers-containers.md)
 
 ---
 
@@ -67,3 +68,4 @@ See [`docs/BRANCHING.md`](docs/BRANCHING.md) for the Git workflow diagram, confl
 
 - [`devops-setup/PR-description.md`](devops-setup/PR-description.md) — Linux filesystem permissions PR (scenario-based Q&A included)
 - [`devops-setup/PR-description-containerization.md`](devops-setup/PR-description-containerization.md) — Containerization concepts PR (scenario-based Q&A included)
+- [`devops-setup/PR-description-docker-architecture.md`](devops-setup/PR-description-docker-architecture.md) — Docker architecture (images, layers, containers) PR (scenario-based Q&A included)
