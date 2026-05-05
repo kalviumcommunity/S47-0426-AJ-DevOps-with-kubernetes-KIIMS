@@ -56,6 +56,12 @@ See [`devops-setup/README.md`](devops-setup/README.md) for the local environment
 
 ---
 
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the branching strategy, commit conventions, and PR process.
+
+See [`docs/BRANCHING.md`](docs/BRANCHING.md) for the Git workflow diagram, conflict resolution walkthrough, and the scenario-based question answer (parallel feature development).
+
 ## PR Contribution
 
 See [`devops-setup/PR-description.md`](devops-setup/PR-description.md) for the full pull request description, design decisions, and the scenario-based question answer.

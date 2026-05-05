@@ -60,3 +60,33 @@ class TestIndexEndpoint:
         response = client.get("/")
         data = response.get_json()
         assert "version" in data
+
+
+class TestErrorHandlers:
+    """Tests for the JSON error handlers."""
+
+    def test_404_returns_json(self, client):
+        """Unknown routes should return JSON, not Flask's default HTML."""
+        response = client.get("/this-route-does-not-exist")
+        assert response.status_code == 404
+        data = response.get_json()
+        assert data is not None
+        assert "error" in data
+
+    def test_404_error_message(self, client):
+        response = client.get("/nonexistent")
+        data = response.get_json()
+        assert data["error"] == "not found"
+
+    def test_405_returns_json(self, client):
+        """Wrong HTTP method should return JSON 405."""
+        response = client.post("/health")
+        assert response.status_code == 405
+        data = response.get_json()
+        assert data is not None
+        assert "error" in data
+
+    def test_405_error_message(self, client):
+        response = client.delete("/ready")
+        data = response.get_json()
+        assert data["error"] == "method not allowed"
