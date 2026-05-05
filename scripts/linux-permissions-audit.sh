@@ -124,12 +124,12 @@ else
     info "Dockerfile is not executable — correct."
 fi
 
-info "Verify the entrypoint script IS executable (required for Docker CMD / ENTRYPOINT)"
-ENTRYPOINT="${PROJECT_ROOT}/scripts/linux-permissions-audit.sh"
-if [[ -x "${ENTRYPOINT}" ]]; then
+info "Verify the audit script itself is executable"
+AUDIT_SCRIPT="${PROJECT_ROOT}/scripts/linux-permissions-audit.sh"
+if [[ -x "${AUDIT_SCRIPT}" ]]; then
     info "Audit script is executable — correct."
 else
-    warn "Audit script is NOT executable. Fix with: chmod +x ${ENTRYPOINT}"
+    warn "Audit script is NOT executable. Fix with: chmod +x ${AUDIT_SCRIPT}"
 fi
 
 
