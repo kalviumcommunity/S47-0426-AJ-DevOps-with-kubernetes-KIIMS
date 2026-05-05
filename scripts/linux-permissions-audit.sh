@@ -108,7 +108,7 @@ fi
 
 info "Identify files with the SUID/SGID bit set (potential privilege escalation)"
 cmd_echo "find ${PROJECT_ROOT} -not -path '*/.git/*' \\( -perm -4000 -o -perm -2000 \\) -type f"
-SUID_FILES=$(find "${PROJECT_ROOT}" -not -path '*/.git/*' \( -perm -4000 -o -perm -2000 \) -type f 2>/dev/null)
+SUID_FILES=$(find "${PROJECT_ROOT}" -not -path '*/.git/*' \( -perm -4000 -o -perm -2000 \) -type f 2>/dev/null || true)
 if [[ -z "${SUID_FILES}" ]]; then
     info "No SUID/SGID files found — good."
 else
