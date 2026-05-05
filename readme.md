@@ -9,6 +9,7 @@
 - [Concept 1 — CI/CD Artifact Flow: Source → Image → Registry → Cluster](docs/Readme[concept-1Anushka].md)
 - [Concept 2 — Kubernetes Application Lifecycle](docs/Readme[concept-2Anushka].md)
 - [Concept 3 — CI/CD Pipeline Responsibilities](docs/Readme[concept-3Anushka].md)
+- [Containerization Concepts — Why Containers Exist and How They Apply to This Project](docs/containerization-concepts.md)
 
 ---
 
@@ -62,6 +63,7 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the branching strategy, commit conv
 
 See [`docs/BRANCHING.md`](docs/BRANCHING.md) for the Git workflow diagram, conflict resolution walkthrough, and the scenario-based question answer (parallel feature development).
 
-## PR Contribution
+## PR Contributions
 
-See [`devops-setup/PR-description.md`](devops-setup/PR-description.md) for the full pull request description, design decisions, and the scenario-based question answer.
+- [`devops-setup/PR-description.md`](devops-setup/PR-description.md) — Linux filesystem permissions PR (scenario-based Q&A included)
+- [`devops-setup/PR-description-containerization.md`](devops-setup/PR-description-containerization.md) — Containerization concepts PR (scenario-based Q&A included)
