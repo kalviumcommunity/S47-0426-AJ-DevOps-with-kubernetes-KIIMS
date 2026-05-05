@@ -37,8 +37,8 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install linting tools
-        run: pip install flake8 pylint
+      - name: Install dependencies and linting tools
+        run: pip install -r requirements.txt flake8 pylint
 
       - name: Run flake8 (style + syntax check)
         # --max-line-length 120 matches the project's agreed line length
