@@ -35,7 +35,7 @@ spec:
         - name: sprint3-app
           # IMAGE_TAG is replaced by the CI/CD pipeline with the actual
           # commit-SHA tag (e.g. sha-9f3a1c2) before this manifest is applied.
-          image: ghcr.io/OWNER/sprint3-app:IMAGE_TAG
+          image: ghcr.io/kalviumcommunity/sprint3-app:IMAGE_TAG
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
