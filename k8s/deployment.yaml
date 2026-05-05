@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sprint3-app
+  namespace: default
+  labels:
+    app: sprint3-app
+    # The pipeline substitutes IMAGE_TAG at deploy time so every Deployment
+    # object in the cluster history is labelled with the exact image it ran.
+    version: IMAGE_TAG
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: sprint3-app
+
+  # Rolling update strategy — ensures zero downtime during deployments.
+  # maxUnavailable: 0  → never remove an old pod before a new one is ready
+  # maxSurge: 1        → allow one extra pod above the desired count during rollout
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+
+  template:
+    metadata:
+      labels:
+        app: sprint3-app
+        version: IMAGE_TAG
+
+    spec:
+      containers:
+        - name: sprint3-app
+          # IMAGE_TAG is replaced by the CI/CD pipeline with the actual
+          # commit-SHA tag (e.g. sha-9f3a1c2) before this manifest is applied.
+          image: ghcr.io/OWNER/sprint3-app:IMAGE_TAG
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+
+          # ── Resource requests and limits ──────────────────────────────────
+          # requests: minimum guaranteed resources — used by the Scheduler
+          # limits:   maximum allowed — CPU throttles, memory OOMKills
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+
+          # ── Health probes ─────────────────────────────────────────────────
+          # startupProbe: gives the app time to initialise before liveness kicks in
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            failureThreshold: 10
+            periodSeconds: 5
+
+          # livenessProbe: restarts the container if the app becomes unresponsive
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 0   # startup probe handles the delay
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 3
+
+          # readinessProbe: removes the pod from the load balancer if it cannot
+          # serve traffic (e.g. during a slow startup or temporary overload)
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 3
+
+          # ── Environment variables ─────────────────────────────────────────
+          env:
+            - name: APP_ENV
+              value: "production"
+            - name: PORT
+              value: "8080"
+
+      # Ensure the cluster can pull the image from GHCR
+      imagePullSecrets:
+        - name: ghcr-pull-secret
