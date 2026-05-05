@@ -1,0 +1,53 @@
+# .dockerignore — controls what is sent to the Docker build context
+#
+# Files listed here are NOT sent to the Docker daemon when `docker build` runs.
+# A smaller build context means:
+#   - Faster context transfer (especially important in CI)
+#   - No risk of accidentally COPYing secrets or test data into the image
+#   - COPY instructions that use wildcards (e.g. COPY . .) are not polluted
+#     by unrelated files
+
+# ── Version control ───────────────────────────────────────────────────────────
+.git
+.gitignore
+.github
+
+# ── Python cache and compiled files ──────────────────────────────────────────
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info
+dist/
+build/
+.eggs/
+
+# ── Test and coverage artefacts ───────────────────────────────────────────────
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# ── Documentation and project files ──────────────────────────────────────────
+docs/
+devops-setup/
+scripts/
+*.md
+!README.md
+
+# ── Local development and editor files ───────────────────────────────────────
+.env
+.env.*
+*.env
+.venv
+venv/
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ── OS-generated files ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
