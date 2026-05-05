@@ -30,10 +30,10 @@ jobs:
 
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v5.6.0
         with:
           python-version: "3.11"
 
@@ -43,12 +43,7 @@ jobs:
       - name: Run flake8 (style + syntax check)
         # --max-line-length 120 matches the project's agreed line length
         # --count prints total error count at the end for quick scanning
-        run: |
-          flake8 app/ \
-            --max-line-length=120 \
-            --count \
-            --statistics \
-            --show-source
+        run: flake8 app/ --max-line-length=120 --count --statistics --show-source
 
       - name: Run pylint (deeper static analysis)
         run: pylint app/ --fail-under=7.0
@@ -65,10 +60,10 @@ jobs:
 
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v5.6.0
         with:
           python-version: "3.11"
 
@@ -80,18 +75,13 @@ jobs:
       - name: Run unit tests with coverage
         # --tb=short gives concise tracebacks on failure
         # --cov-fail-under=80 enforces a minimum 80% coverage threshold
-        run: |
-          pytest tests/ \
-            --tb=short \
-            --cov=app \
-            --cov-report=term-missing \
-            --cov-fail-under=80
+        run: pytest tests/ --tb=short --cov=app --cov-report=term-missing --cov-report=html --cov-fail-under=80
 
       - name: Upload coverage report as artifact
         # Always upload so the report is available even when tests fail —
         # this gives developers the coverage diff without re-running locally.
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: coverage-report
           path: htmlcov/
@@ -117,7 +107,7 @@ jobs:
 
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Set up Docker Buildx
         # Buildx enables multi-platform builds and layer caching
@@ -167,7 +157,7 @@ jobs:
 
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
