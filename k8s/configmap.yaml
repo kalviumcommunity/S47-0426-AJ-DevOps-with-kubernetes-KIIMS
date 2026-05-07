@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: patient-portal-config
+  namespace: default
+data:
+  NODE_ENV: "production"
+  BACKEND_URL: "http://patient-portal-backend:8080"
+  LOG_LEVEL: "info"
