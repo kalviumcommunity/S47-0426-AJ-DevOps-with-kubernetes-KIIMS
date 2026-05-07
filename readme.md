@@ -115,3 +115,4 @@ Key resources:
 - [Kubernetes Services & Networking](docs/K8S_SERVICES.md)
 - [Kubernetes Architecture](docs/K8S_ARCHITECTURE.md)
 - [Kubernetes Configuration & Secrets](docs/K8S_CONFIG_SECRETS.md)
+- [Kubernetes Health Checks & Self-Healing](docs/K8S_HEALTH_CHECKS.md)
