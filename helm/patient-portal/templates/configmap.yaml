@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.config.name | default "patient-portal-config" }}
+  namespace: {{ .Release.Namespace }}
+data:
+  NODE_ENV: {{ .Values.config.nodeEnv | quote }}
+  BACKEND_URL: "http://{{ .Values.backend.name }}:{{ .Values.service.port }}"
+  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+  PORT: {{ .Values.backend.containerPort | quote }}
+  SIMPLE_REGISTRAR: {{ .Values.config.simpleRegistrar | quote }}

@@ -1,0 +1,57 @@
+# Default values for patient-portal.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 2
+
+image:
+  repository: ghcr.io/kalviumcommunity
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+backend:
+  name: patient-portal-backend
+  replicaCount: 2
+  containerPort: 8080
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+  hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+
+frontend:
+  name: patient-portal-frontend
+  replicaCount: 2
+  containerPort: 80
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+config:
+  nodeEnv: "production"
+  logLevel: "info"
+  simpleRegistrar: "false"
+
+# Secrets should be handled carefully. 
+# In a real scenario, use External Secrets or Sealed Secrets.
+# These are placeholder values.
+secrets:
+  mongodbUri: "UkVQTEFDRV9NRQ=="
+  jwtSecret: "UkVQTEFDRV9NRQ=="
+  sessionSecret: "UkVQTEFDRV9NRQ=="
+
+service:
+  type: ClusterIP
+  port: 80
