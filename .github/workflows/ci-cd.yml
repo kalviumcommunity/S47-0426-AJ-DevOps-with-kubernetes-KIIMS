@@ -171,26 +171,32 @@ jobs:
           echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > $HOME/.kube/config
           chmod 600 $HOME/.kube/config
 
-      - name: Substitute image tag in Kubernetes manifest
-        # Replace the placeholder IMAGE_TAG in the manifest with the actual
+      - name: Substitute image tag in Kubernetes manifests
+        # Replace the placeholder IMAGE_TAG in the manifests with the actual
         # commit-SHA tag produced by the build stage.
         run: |
           IMAGE_TAG="${{ needs.build.outputs.image_tag }}"
-          sed -i "s|IMAGE_TAG|${IMAGE_TAG}|g" k8s/deployment.yaml
+          sed -i "s|IMAGE_TAG|${IMAGE_TAG}|g" k8s/frontend-deployment.yaml
+          sed -i "s|IMAGE_TAG|${IMAGE_TAG}|g" k8s/backend-deployment.yaml
           echo "Deploying image tag: ${IMAGE_TAG}"
 
       - name: Apply Kubernetes manifests
         run: |
-          kubectl apply -f k8s/deployment.yaml
-          kubectl apply -f k8s/service.yaml
+          kubectl apply -f k8s/configmap.yaml
+          kubectl apply -f k8s/secret.yaml
+          kubectl apply -f k8s/frontend-deployment.yaml
+          kubectl apply -f k8s/backend-deployment.yaml
+          kubectl apply -f k8s/services.yaml
+          kubectl apply -f k8s/hpa.yaml
+          kubectl apply -f k8s/ingress.yaml
+          kubectl apply -f k8s/network-policy.yaml
 
       - name: Wait for rollout to complete
         # --timeout=120s: if pods are not healthy within 2 minutes, the rollout
         # is considered failed and this step exits with a non-zero code.
         run: |
-          kubectl rollout status deployment/sprint3-app \
-            --namespace=default \
-            --timeout=120s
+          kubectl rollout status deployment/patient-portal-frontend --namespace=default --timeout=120s
+          kubectl rollout status deployment/patient-portal-backend --namespace=default --timeout=120s
 
       - name: Automatic rollback on failure
         # This step only runs if the rollout status check above failed.
@@ -198,11 +204,11 @@ jobs:
         if: failure()
         run: |
           echo "Rollout failed — initiating automatic rollback"
-          kubectl rollout undo deployment/sprint3-app --namespace=default
+          kubectl rollout undo deployment/patient-portal-frontend --namespace=default
+          kubectl rollout undo deployment/patient-portal-backend --namespace=default
           echo "Rollback complete. Verifying restored state..."
-          kubectl rollout status deployment/sprint3-app \
-            --namespace=default \
-            --timeout=60s
+          kubectl rollout status deployment/patient-portal-frontend --namespace=default --timeout=60s
+          kubectl rollout status deployment/patient-portal-backend --namespace=default --timeout=60s
 
       - name: Notify on deployment failure
         # Posts a summary to the GitHub Actions step summary so the failure
