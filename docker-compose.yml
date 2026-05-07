@@ -1,5 +1,8 @@
 services:
   backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     image: ${BACKEND_IMAGE:-ghcr.io/kalviumcommunity/patient-portal-backend:latest}
     container_name: patient-portal-backend
     restart: unless-stopped
@@ -13,6 +16,9 @@ services:
       SESSION_SECRET: ${SESSION_SECRET:-dev_session_secret_change_me}
 
   frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     image: ${FRONTEND_IMAGE:-ghcr.io/kalviumcommunity/patient-portal-frontend:latest}
     container_name: patient-portal-frontend
     restart: unless-stopped
