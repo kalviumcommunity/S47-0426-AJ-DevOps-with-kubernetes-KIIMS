@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: patient-portal-frontend
-          image: ghcr.io/kalviumcommunity/patient-portal-frontend:IMAGE_TAG
+          image: ghcr.io/kalviumcommunity/patient-portal-frontend:latest
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
