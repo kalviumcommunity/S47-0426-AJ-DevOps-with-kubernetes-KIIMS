@@ -7,3 +7,5 @@ data:
   NODE_ENV: "production"
   BACKEND_URL: "http://patient-portal-backend:80"
   LOG_LEVEL: "info"
+  PORT: "8080"
+  SIMPLE_REGISTRAR: "false"
