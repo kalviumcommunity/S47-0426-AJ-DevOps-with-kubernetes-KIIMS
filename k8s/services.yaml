@@ -1,3 +1,4 @@
+# Backend Service: Exposes the backend API to other components within the cluster
 apiVersion: v1
 kind: Service
 metadata:
@@ -6,15 +7,18 @@ metadata:
   labels:
     app: patient-portal-backend
 spec:
+  # ClusterIP is the default type, making the service only reachable inside the cluster
   type: ClusterIP
   selector:
+    # This selector matches the labels defined in the backend Deployment's pod template
     app: patient-portal-backend
   ports:
     - name: http
-      port: 80
-      targetPort: 8080
+      port: 80           # The port that the service is exposed on within the cluster
+      targetPort: 8080   # The port on the pod that the service forwards traffic to
       protocol: TCP
 ---
+# Frontend Service: Exposes the web frontend within the cluster
 apiVersion: v1
 kind: Service
 metadata:
@@ -25,9 +29,10 @@ metadata:
 spec:
   type: ClusterIP
   selector:
+    # Matches the labels defined in the frontend Deployment
     app: patient-portal-frontend
   ports:
     - name: http
-      port: 80
+      port: 80           # Both service port and target port are 80 for the frontend
       targetPort: 80
       protocol: TCP
