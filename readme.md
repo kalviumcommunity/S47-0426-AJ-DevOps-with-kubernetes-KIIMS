@@ -106,3 +106,11 @@ Key resources:
 | `k8s/hpa.yaml`              | HPA: 2–10 replicas at 70% CPU utilization        |
 | `k8s/services.yaml`         | ClusterIP Services for frontend and backend      |
 | `k8s/ingress.yaml`          | HTTPS Ingress routing                            |
+
+---
+
+## Documentation
+
+- [Kubernetes Workloads & Desired State](docs/K8S_WORKLOADS.md)
+- [Kubernetes Services & Networking](docs/K8S_SERVICES.md)
+- [Kubernetes Architecture](docs/K8S_ARCHITECTURE.md)

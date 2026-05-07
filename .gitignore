@@ -24,3 +24,8 @@ npm-debug.log*
 # Test coverage
 coverage/
 .nyc_output/
+
+# Vite
+.vite/
+**/node_modules/
+**/dist/
