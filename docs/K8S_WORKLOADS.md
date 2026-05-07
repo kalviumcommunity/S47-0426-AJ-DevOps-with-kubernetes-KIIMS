@@ -122,3 +122,59 @@ Imagine we have applied our `replicaset.yaml` and we currently have 3 Pods runni
 6.  **New Actual State:** 5 Pods.
 
 This demonstrates the power of declarative, desired-state management. You never tell Kubernetes to "start two new pods." You simply state that you want a total of five, and Kubernetes handles the complex logic of achieving and maintaining that state.
+
+---
+
+## 4. Using Deployments for Application Lifecycle
+
+While ReplicaSets ensure a specific number of Pods are running, **Deployments** provide a higher-level abstraction that manages the lifecycle of ReplicaSets. They allow you to update your application with zero downtime through **Rollouts**.
+
+### Example: `k8s/deployment.yaml`
+We have created a Deployment manifest (`k8s/deployment.yaml`) to demonstrate rollout management:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: patient-portal-demo-deployment
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: patient-portal-demo
+  template:
+    metadata:
+      labels:
+        app: patient-portal-demo
+    spec:
+      containers:
+        - name: nginx-container
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+```
+
+### Key Deployment Features:
+
+1.  **Rolling Updates:** When you update the container image or configuration, the Deployment creates a new ReplicaSet and gradually moves Pods from the old ReplicaSet to the new one.
+2.  **Zero Downtime:** With `maxUnavailable: 0`, the Deployment ensures that the desired number of Pods is always available during the update.
+3.  **Rollback Capability:** Kubernetes keeps a history of previous ReplicaSets. If an update fails, you can quickly roll back to a previous version using `kubectl rollout undo`.
+
+### Observing a Rollout
+
+You can observe the status of a rollout using:
+```bash
+kubectl rollout status deployment/patient-portal-demo-deployment
+```
+
+And view the update history:
+```bash
+kubectl rollout history deployment/patient-portal-demo-deployment
+```
+
+This declarative approach allows you to manage the entire application lifecycle—deployment, scaling, and updates—simply by modifying your YAML manifests.
