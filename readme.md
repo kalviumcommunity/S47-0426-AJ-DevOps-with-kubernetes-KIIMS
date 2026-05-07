@@ -114,3 +114,4 @@ Key resources:
 - [Kubernetes Workloads & Desired State](docs/K8S_WORKLOADS.md)
 - [Kubernetes Services & Networking](docs/K8S_SERVICES.md)
 - [Kubernetes Architecture](docs/K8S_ARCHITECTURE.md)
+- [Kubernetes Configuration & Secrets](docs/K8S_CONFIG_SECRETS.md)
