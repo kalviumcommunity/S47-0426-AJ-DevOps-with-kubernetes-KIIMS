@@ -168,7 +168,7 @@ jobs:
         # KUBE_CONFIG is a base64-encoded kubeconfig stored as a GitHub secret
         run: |
           mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > $HOME/.kube/config
+          printf "%s" "${{ secrets.KUBE_CONFIG }}" | base64 --decode > $HOME/.kube/config
           chmod 600 $HOME/.kube/config
 
       - name: Substitute image tag in Kubernetes manifests
@@ -192,15 +192,13 @@ jobs:
           kubectl apply -f k8s/network-policy.yaml
 
       - name: Wait for rollout to complete
-        # --timeout=120s: if pods are not healthy within 2 minutes, the rollout
-        # is considered failed and this step exits with a non-zero code.
+        # Monitors both backend and frontend deployments for successful rollout.
         run: |
           kubectl rollout status deployment/patient-portal-frontend --namespace=default --timeout=120s
           kubectl rollout status deployment/patient-portal-backend --namespace=default --timeout=120s
 
       - name: Automatic rollback on failure
-        # This step only runs if the rollout status check above failed.
-        # It rolls back to the previous known-good Deployment revision.
+        # This step only runs if any of the previous deployment steps failed.
         if: failure()
         run: |
           echo "Rollout failed — initiating automatic rollback"
@@ -211,8 +209,7 @@ jobs:
           kubectl rollout status deployment/patient-portal-backend --namespace=default --timeout=60s
 
       - name: Notify on deployment failure
-        # Posts a summary to the GitHub Actions step summary so the failure
-        # is visible in the PR/commit view without needing to dig into logs.
+        # Posts a summary to the GitHub Actions step summary on failure.
         if: failure()
         run: |
           echo "## ❌ Deployment Failed" >> $GITHUB_STEP_SUMMARY
@@ -221,7 +218,7 @@ jobs:
           echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Automatic rollback has been triggered. Check the rollback step above for details." >> $GITHUB_STEP_SUMMARY
+          echo "Automatic rollback has been triggered if applicable. Check the logs for details." >> $GITHUB_STEP_SUMMARY
 
       - name: Notify on deployment success
         if: success()
