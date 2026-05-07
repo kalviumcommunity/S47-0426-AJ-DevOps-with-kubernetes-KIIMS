@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: patient-portal-backend
-          image: ghcr.io/kalviumcommunity/patient-portal-backend:latest
+          image: ghcr.io/kalviumcommunity/patient-portal-backend:IMAGE_TAG
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
