@@ -9,6 +9,7 @@ import { createAuthRoutes } from './routes/auth.routes';
 import { createDefaultAuthService } from './auth/auth.service';
 import patientRoutes from './routes/patient.routes';
 import appointmentRoutes from './routes/appointment.routes';
+import simpleRegistrarRoutes from './simpleRegistrar';
 
 const app = express();
 
@@ -39,6 +40,10 @@ app.use('/patients', patientRoutes);
 // Appointment endpoints
 app.use('/appointments', appointmentRoutes);
 
+// Simple in-memory registrar (for quick local dev)
+if (process.env.SIMPLE_REGISTRAR === 'true') {
+  app.use('/api', simpleRegistrarRoutes);
+}
 // Placeholder health/root route
 app.get('/', (_req: Request, res: Response) => {
   res.json({ status: 'ok' });

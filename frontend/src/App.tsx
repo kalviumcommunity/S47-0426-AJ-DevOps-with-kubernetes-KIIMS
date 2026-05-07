@@ -1,3 +1,19 @@
+import React from 'react'
+import BookAppointmentPage from './pages/BookAppointmentPage'
+
+export default function App() {
+  return (
+    <div className="container">
+      <header className="header">
+        <h1>Patient Portal</h1>
+        <p>Manage your health journey with ease.</p>
+      </header>
+      <main>
+        <BookAppointmentPage />
+      </main>
+    </div>
+  )
+}
 import { Navigate, Route, Routes } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';

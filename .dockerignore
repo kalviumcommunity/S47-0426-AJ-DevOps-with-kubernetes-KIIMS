@@ -31,11 +31,24 @@ htmlcov/
 coverage.xml
 
 # ── Documentation and project files ──────────────────────────────────────────
+README.md
 docs/
 devops-setup/
 scripts/
 *.md
 !README.md
+
+# ── Node.js dependencies and build output ────────────────────────────────────
+node_modules
+npm-debug.log
+backend/node_modules
+frontend/node_modules
+backend/dist
+frontend/dist
+
+# ── Kiro spec and test artefacts ─────────────────────────────────────────────
+.kiro/
+coverage/
 
 # ── Local development and editor files ───────────────────────────────────────
 .env
