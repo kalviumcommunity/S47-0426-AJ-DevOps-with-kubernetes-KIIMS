@@ -1,71 +1,108 @@
-# SPRINT - 3
+# Hospital Patient Portal
 
-## DevOps with Kubernetes & CI/CD
-
----
-
-## Learning Concepts
-
-- [Concept 1 — CI/CD Artifact Flow: Source → Image → Registry → Cluster](docs/Readme[concept-1Anushka].md)
-- [Concept 2 — Kubernetes Application Lifecycle](docs/Readme[concept-2Anushka].md)
-- [Concept 3 — CI/CD Pipeline Responsibilities](docs/Readme[concept-3Anushka].md)
-- [Containerization Concepts — Why Containers Exist and How They Apply to This Project](docs/containerization-concepts.md)
-- [Docker Architecture — Images, Layers, and Containers](docs/docker-architecture-images-layers-containers.md)
+A full-stack web application that allows patients to manage their profiles, book appointments, and interact with healthcare services. Built with a React frontend, Express/TypeScript backend, MongoDB, and deployed on Kubernetes.
 
 ---
 
-## CI/CD Pipeline
+## Overview
 
-This repository includes a working GitHub Actions CI/CD pipeline that demonstrates the full artifact flow described in the concept documents.
+The Hospital Patient Portal provides patients with a secure, self-service interface to:
 
-**Pipeline file:** [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml)
+- Register and authenticate with JWT-based sessions
+- View and update their personal profile
+- Browse available appointment slots by specialty
+- Book, view, and cancel appointments
+- Receive real-time feedback on booking conflicts and business rule violations
 
-### Pipeline Stages
+---
 
-| Stage | What It Does | Runs On |
-|---|---|---|
-| **1 — Lint** | flake8 + pylint static analysis | All pushes and PRs |
-| **2 — Test** | pytest unit tests with 80% coverage gate | All pushes and PRs |
-| **3 — Build & Push** | Docker image built, tagged with commit SHA, pushed to GHCR | Merges to `main` only |
-| **4 — Deploy** | Kubernetes manifests applied, rollout monitored, auto-rollback on failure | Merges to `main` only |
-
-### Key Files
+## Architecture
 
 ```
-.github/
-  workflows/
-    ci-cd.yml          ← GitHub Actions pipeline (4 stages)
-
-app/
-  main.py              ← Flask application (health + ready endpoints)
-
-tests/
-  test_app.py          ← Unit tests (run by Stage 2)
-
-k8s/
-  deployment.yaml      ← Kubernetes Deployment (rolling update + health probes)
-  service.yaml         ← Kubernetes Service (ClusterIP)
-
-Dockerfile             ← Multi-stage build (builder + runtime)
-requirements.txt       ← Pinned Python dependencies
+hospital-patient-portal/
+├── frontend/          # React + Vite + TypeScript + Tailwind CSS
+├── backend/           # Express + TypeScript + Mongoose
+├── k8s/               # Kubernetes manifests
+└── README.md
 ```
 
+**Frontend:** React SPA served via Nginx, communicates with the backend over HTTPS.
+
+**Backend:** RESTful Express API with JWT authentication, Mongoose ODM, Winston structured logging, and Prometheus metrics.
+
+**Database:** MongoDB, accessed via a Kubernetes Secret-injected connection URI.
+
+**Infrastructure:** Kubernetes Deployments with rolling updates, HPA for autoscaling, and an Ingress for HTTPS routing.
+
 ---
 
-## DevOps Environment Setup
+## Getting Started
 
-See [`devops-setup/README.md`](devops-setup/README.md) for the local environment configuration (Docker Desktop, kubectl, Helm, etc.).
+### Prerequisites
+
+- Node.js 18+
+- MongoDB (local or Atlas)
+- npm or yarn
+
+### Backend Setup
+
+```bash
+cd backend
+npm install
+cp .env.example .env   # fill in MONGODB_URI, JWT_SECRET, SESSION_SECRET
+npm run dev
+```
+
+The backend starts on `http://localhost:3001` by default.
+
+### Frontend Setup
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The frontend starts on `http://localhost:5173` by default.
 
 ---
 
-## Contributing
+## Environment Variables
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the branching strategy, commit conventions, and PR process.
+The backend requires the following environment variables:
 
-See [`docs/BRANCHING.md`](docs/BRANCHING.md) for the Git workflow diagram, conflict resolution walkthrough, and the scenario-based question answer (parallel feature development).
+| Variable         | Description                              |
+|------------------|------------------------------------------|
+| `MONGODB_URI`    | MongoDB connection string                |
+| `JWT_SECRET`     | Secret key for signing JWTs             |
+| `SESSION_SECRET` | Secret key for session management        |
+| `PORT`           | HTTP port (default: `3001`)              |
+| `LOG_LEVEL`      | Winston log level (default: `info`)      |
 
-## PR Contributions
+Set these in a `backend/.env` file for local development. In Kubernetes, they are injected from the `patient-portal-secrets` Secret.
 
-- [`devops-setup/PR-description.md`](devops-setup/PR-description.md) — Linux filesystem permissions PR (scenario-based Q&A included)
-- [`devops-setup/PR-description-containerization.md`](devops-setup/PR-description-containerization.md) — Containerization concepts PR (scenario-based Q&A included)
-- [`devops-setup/PR-description-docker-architecture.md`](devops-setup/PR-description-docker-architecture.md) — Docker architecture (images, layers, containers) PR (scenario-based Q&A included)
+---
+
+## Kubernetes Deployment
+
+Manifests are located in the `k8s/` directory.
+
+```bash
+# Apply all manifests
+kubectl apply -f k8s/
+
+# Check rollout status
+kubectl rollout status deployment/patient-portal-backend
+kubectl rollout status deployment/patient-portal-frontend
+```
+
+Key resources:
+
+| File                        | Description                                      |
+|-----------------------------|--------------------------------------------------|
+| `k8s/secret.yaml`           | MongoDB URI, JWT secret, session secret          |
+| `k8s/backend-deployment.yaml` | Backend Deployment (2 replicas, rolling update) |
+| `k8s/frontend-deployment.yaml` | Frontend Deployment (Nginx)                   |
+| `k8s/hpa.yaml`              | HPA: 2–10 replicas at 70% CPU utilization        |
+| `k8s/services.yaml`         | ClusterIP Services for frontend and backend      |
+| `k8s/ingress.yaml`          | HTTPS Ingress routing                            |

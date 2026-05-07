@@ -1,0 +1,22 @@
+services:
+  backend:
+    image: ${BACKEND_IMAGE:-ghcr.io/kalviumcommunity/patient-portal-backend:latest}
+    container_name: patient-portal-backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: "8080"
+      # Set real values via environment or an .env file when needed.
+      MONGODB_URI: ${MONGODB_URI:-mongodb://host.docker.internal:27017/patient_portal}
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_me}
+      SESSION_SECRET: ${SESSION_SECRET:-dev_session_secret_change_me}
+
+  frontend:
+    image: ${FRONTEND_IMAGE:-ghcr.io/kalviumcommunity/patient-portal-frontend:latest}
+    container_name: patient-portal-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
