@@ -1,0 +1,35 @@
+# Backend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.backend.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.backend.name }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    app: {{ .Values.backend.name }}
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.backend.containerPort }}
+      protocol: TCP
+---
+# Frontend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.frontend.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.frontend.name }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    app: {{ .Values.frontend.name }}
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.frontend.containerPort }}
+      protocol: TCP
