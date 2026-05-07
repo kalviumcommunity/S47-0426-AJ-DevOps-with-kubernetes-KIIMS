@@ -27,6 +27,8 @@ spec:
           ports:
             - containerPort: 8080
           envFrom:
+            - configMapRef:
+                name: patient-portal-config
             - secretRef:
                 name: patient-portal-secrets
           env:

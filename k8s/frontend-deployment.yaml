@@ -24,6 +24,9 @@ spec:
         - name: patient-portal-frontend
           image: ghcr.io/kalviumcommunity/patient-portal-frontend:IMAGE_TAG
           imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: patient-portal-config
           ports:
             - containerPort: 80
           resources:
