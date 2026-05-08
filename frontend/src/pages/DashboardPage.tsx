@@ -38,14 +38,18 @@ export default function DashboardPage() {
 
   const upcomingAppointments = useMemo(() => {
     const now = Date.now();
-    return (appointmentsQuery.data ?? []).filter((appointment) => {
+    const data = Array.isArray(appointmentsQuery.data) ? appointmentsQuery.data : [];
+    return data.filter((appointment) => {
+      if (!appointment || !appointment.scheduledAt) return false;
       return appointment.status === 'scheduled' && new Date(appointment.scheduledAt).getTime() >= now;
     });
   }, [appointmentsQuery.data]);
 
   const pastAppointments = useMemo(() => {
     const now = Date.now();
-    return (appointmentsQuery.data ?? []).filter((appointment) => {
+    const data = Array.isArray(appointmentsQuery.data) ? appointmentsQuery.data : [];
+    return data.filter((appointment) => {
+      if (!appointment || !appointment.scheduledAt) return false;
       return appointment.status !== 'scheduled' || new Date(appointment.scheduledAt).getTime() < now;
     });
   }, [appointmentsQuery.data]);

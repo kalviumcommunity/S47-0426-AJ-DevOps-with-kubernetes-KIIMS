@@ -17,7 +17,12 @@ interface AppConfig {
 const REQUIRED_ENV_VARS = ['MONGODB_URI', 'JWT_SECRET', 'SESSION_SECRET'] as const;
 
 function validateEnv(): void {
-  const missing = REQUIRED_ENV_VARS.filter((key) => !process.env[key]);
+  const isSimpleRegistrar = process.env.SIMPLE_REGISTRAR === 'true';
+  const requiredVars = isSimpleRegistrar 
+    ? ['JWT_SECRET', 'SESSION_SECRET'] 
+    : ['MONGODB_URI', 'JWT_SECRET', 'SESSION_SECRET'];
+
+  const missing = requiredVars.filter((key) => !process.env[key]);
 
   if (missing.length > 0) {
     console.error(

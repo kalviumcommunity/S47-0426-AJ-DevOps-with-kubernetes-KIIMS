@@ -1,0 +1,13 @@
+[
+  {
+    "_id": "69fd761b72ed432d71bc92a3",
+    "email": "anushkapoonia53@gmail.com",
+    "password": "anushkapoonia",
+    "firstName": "Anushka",
+    "lastName": "Poonia",
+    "dateOfBirth": "2026-05-01T00:00:00.000Z",
+    "phone": "+918302575195",
+    "createdAt": "2026-05-08T05:35:23.555Z",
+    "updatedAt": "2026-05-08T05:35:23.555Z"
+  }
+]

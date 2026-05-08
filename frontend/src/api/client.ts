@@ -142,26 +142,36 @@ function unwrapAuthResponse(payload: AuthResponse): AuthResponse {
 export const patientPortalAPI: PatientPortalAPI = {
   async login(credentials) {
     const response = await api.post<AuthResponse>('/auth/login', credentials);
-    return unwrapAuthResponse(response.data);
+    const data = unwrapAuthResponse(response.data);
+    const token = data.tokens?.accessToken || data.accessToken;
+    if (token) setAccessToken(token);
+    return data;
   },
 
   async register(credentials) {
     const response = await api.post<AuthResponse>('/auth/register', credentials);
-    return unwrapAuthResponse(response.data);
+    const data = unwrapAuthResponse(response.data);
+    const token = data.tokens?.accessToken || data.accessToken;
+    if (token) setAccessToken(token);
+    return data;
   },
 
   async logout() {
     await api.post('/auth/logout');
+    setAccessToken(null);
   },
 
   async refreshToken() {
     const response = await api.post<AuthResponse>('/auth/refresh');
-    return unwrapAuthResponse(response.data);
+    const data = unwrapAuthResponse(response.data);
+    const token = data.tokens?.accessToken || data.accessToken;
+    if (token) setAccessToken(token);
+    return data;
   },
 
   async getAvailableSlots(date, specialty) {
-    const response = await api.get<TimeSlot[]>('/appointments/slots', { params: { date, specialty } });
-    return response.data;
+    const response = await api.get<{ slots: TimeSlot[] }>('/appointments/slots', { params: { date, specialty } });
+    return response.data.slots || (response.data as any) || [];
   },
 
   async bookAppointment(appointment) {
@@ -170,8 +180,8 @@ export const patientPortalAPI: PatientPortalAPI = {
   },
 
   async getMyAppointments() {
-    const response = await api.get<Appointment[]>('/appointments');
-    return response.data;
+    const response = await api.get<{ appointments: Appointment[] }>('/appointments');
+    return response.data.appointments || (response.data as any) || [];
   },
 
   async cancelAppointment(appointmentId) {

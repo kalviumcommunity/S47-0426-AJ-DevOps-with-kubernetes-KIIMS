@@ -1,10 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
-import { Patient } from '../models/patient.model';
 import { PatientUpdateInput } from './patient.validation';
 import { AppError } from '../middleware/errorHandler';
+import { AuthService, createDefaultAuthService, AuthenticatedPatient } from '../auth/auth.service';
+
+/**
+ * Extend Express Request to include our authenticated user
+ */
+interface AuthenticatedRequest extends Request {
+  user?: AuthenticatedPatient;
+}
 
 export interface PatientControllerDependencies {
-  patientModel: typeof Patient;
+  authService: AuthService;
 }
 
 export interface PatientProfileResponse {
@@ -21,12 +28,8 @@ export interface PatientProfileResponse {
   updatedAt?: Date;
 }
 
-function toPatientProfileResponse(patient: { _id?: { toString(): string }; id?: string } & Record<string, unknown>): PatientProfileResponse {
-  const identifier = typeof patient.id === 'string'
-    ? patient.id
-    : typeof patient._id?.toString === 'function'
-      ? patient._id.toString()
-      : '';
+function toPatientProfileResponse(patient: any): PatientProfileResponse {
+  const identifier = patient.id || patient._id?.toString() || patient._id?.$oid || '';
 
   return {
     id: identifier,
@@ -43,9 +46,9 @@ function toPatientProfileResponse(patient: { _id?: { toString(): string }; id?: 
   };
 }
 
-export function createPatientController(dependencies: PatientControllerDependencies = { patientModel: Patient }) {
+export function createPatientController(dependencies: PatientControllerDependencies = { authService: createDefaultAuthService() }) {
   return {
-    async getProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
+    async getProfile(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
       try {
         const patientId = req.user?.patientId;
         if (!patientId) {
@@ -53,19 +56,19 @@ export function createPatientController(dependencies: PatientControllerDependenc
           return;
         }
 
-        const patient = await dependencies.patientModel.findById(patientId).lean().exec();
+        const patient = await dependencies.authService.getPatientById(patientId);
         if (!patient) {
           next(new AppError(404, 'PATIENT_NOT_FOUND', 'Patient profile not found'));
           return;
         }
 
-        res.status(200).json({ patient: toPatientProfileResponse(patient as Record<string, unknown>) });
+        res.status(200).json({ patient: toPatientProfileResponse(patient) });
       } catch (error) {
         next(error);
       }
     },
 
-    async updateProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
+    async updateProfile(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
       try {
         const patientId = req.user?.patientId;
         if (!patientId) {
@@ -74,17 +77,14 @@ export function createPatientController(dependencies: PatientControllerDependenc
         }
 
         const updates = req.body as PatientUpdateInput;
-        const patient = await dependencies.patientModel
-          .findByIdAndUpdate(patientId, updates, { new: true, runValidators: true })
-          .lean()
-          .exec();
+        const patient = await dependencies.authService.updatePatient(patientId, updates);
 
         if (!patient) {
           next(new AppError(404, 'PATIENT_NOT_FOUND', 'Patient profile not found'));
           return;
         }
 
-        res.status(200).json({ patient: toPatientProfileResponse(patient as Record<string, unknown>) });
+        res.status(200).json({ patient: toPatientProfileResponse(patient) });
       } catch (error) {
         next(error);
       }

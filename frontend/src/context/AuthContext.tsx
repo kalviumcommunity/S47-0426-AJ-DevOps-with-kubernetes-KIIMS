@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        setUser(profile);
+        setUser(profile.patient || profile);
       })
       .catch(() => {
         if (mounted) {
