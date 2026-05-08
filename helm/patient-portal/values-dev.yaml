@@ -1,0 +1,43 @@
+# Development values for patient-portal
+replicaCount: 1
+
+backend:
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 50m
+      memory: 64Mi
+    requests:
+      cpu: 20m
+      memory: 32Mi
+  hpa:
+    enabled: false
+
+frontend:
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 50m
+      memory: 64Mi
+    requests:
+      cpu: 20m
+      memory: 32Mi
+
+config:
+  nodeEnv: "development"
+  logLevel: "debug"
+
+ingress:
+  hosts:
+    - host: dev.patient-portal.local
+      paths:
+        - path: /
+          pathType: Prefix
+          backend: frontend
+        - path: /api
+          pathType: Prefix
+          backend: backend
+  tls:
+    - secretName: patient-portal-dev-tls
+      hosts:
+        - dev.patient-portal.local

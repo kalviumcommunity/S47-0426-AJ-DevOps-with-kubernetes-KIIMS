@@ -1,0 +1,46 @@
+# Production values for patient-portal
+replicaCount: 3
+
+backend:
+  replicaCount: 3
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  hpa:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 15
+    targetCPUUtilizationPercentage: 80
+
+frontend:
+  replicaCount: 3
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+config:
+  nodeEnv: "production"
+  logLevel: "error"
+
+ingress:
+  hosts:
+    - host: patient-portal.com
+      paths:
+        - path: /
+          pathType: Prefix
+          backend: frontend
+        - path: /api
+          pathType: Prefix
+          backend: backend
+  tls:
+    - secretName: patient-portal-prod-tls
+      hosts:
+        - patient-portal.com
