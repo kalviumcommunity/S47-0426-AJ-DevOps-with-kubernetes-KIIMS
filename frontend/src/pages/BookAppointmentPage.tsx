@@ -50,7 +50,7 @@ function formatSlot(slot: TimeSlot): string {
 export default function BookAppointmentPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { isLoading: authLoading, isAuthenticated, user } = useAuth();
+  const { isLoading: authLoading, isAuthenticated } = useAuth();
   const [values, setValues] = useState<BookingFormValues>(initialValues);
   const [errors, setErrors] = useState<BookingErrors>({});
 
