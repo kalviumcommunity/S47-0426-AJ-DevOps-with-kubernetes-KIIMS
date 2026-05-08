@@ -7,9 +7,11 @@ on:
   push:
     branches:
       - main
+      - finall
   pull_request:
     branches:
       - main
+      - finall
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Environment variables shared across all jobs
@@ -99,7 +101,8 @@ jobs:
     needs: test                   # ← only runs if tests pass
 
     # Only build and push on merges to main, not on pull requests
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Only build and push on main or finall branches
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/finall')
 
     outputs:
       # Expose the image tag so the deploy job can reference the exact image
@@ -120,28 +123,32 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract image metadata (tags and labels)
+      - name: Extract short SHA
         id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            # Tag with the short commit SHA for traceability (e.g. sha-9f3a1c2)
-            type=sha,prefix=sha-,format=short
-            # Also tag as 'latest' for convenience
-            type=raw,value=latest
+        run: |
+          echo "version=sha-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
 
-      - name: Build and push Docker image
+      - name: Build and push Backend image
         uses: docker/build-push-action@v5
         with:
-          context: .
-          file: ./Dockerfile
+          context: ./backend
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          # Cache layers from the registry to speed up subsequent builds
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+          tags: |
+            ${{ env.REGISTRY }}/patient-portal-backend:${{ steps.meta.outputs.version }}
+            ${{ env.REGISTRY }}/patient-portal-backend:latest
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/patient-portal-backend:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/patient-portal-backend:buildcache,mode=max
+
+      - name: Build and push Frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/patient-portal-frontend:${{ steps.meta.outputs.version }}
+            ${{ env.REGISTRY }}/patient-portal-frontend:latest
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/patient-portal-frontend:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/patient-portal-frontend:buildcache,mode=max
 
   # ─────────────────────────────────────────────────────────────────────────────
   # STAGE 4 — DEPLOY TO KUBERNETES
@@ -170,19 +177,30 @@ jobs:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG }}
         run: |
           mkdir -p $HOME/.kube
+          # Decode the base64-encoded KUBE_CONFIG secret
           echo "$KUBE_CONFIG_DATA" | base64 --decode > $HOME/.kube/config
           chmod 600 $HOME/.kube/config
           # Verify the config is valid YAML and can be parsed by kubectl
-          kubectl config view > /dev/null || (echo "ERROR: Invalid kubeconfig" && exit 1)
+          if ! kubectl config view > /dev/null 2>&1; then
+            echo "ERROR: Invalid kubeconfig. Please ensure secrets.KUBE_CONFIG is a valid base64-encoded kubeconfig file."
+            exit 1
+          fi
 
-      - name: Substitute image tag in Kubernetes manifests
-        # Replace the placeholder IMAGE_TAG in the manifests with the actual
-        # commit-SHA tag produced by the build stage.
+      - name: Substitute image tag and registry in Kubernetes manifests
+        # Replace the placeholder IMAGE_TAG and the registry owner in the manifests
+        # with the actual values for this run.
         run: |
           IMAGE_TAG="${{ needs.build.outputs.image_tag }}"
+          REGISTRY_OWNER="${{ github.repository_owner }}"
+          echo "Updating manifests with image tag: ${IMAGE_TAG} and owner: ${REGISTRY_OWNER}"
+          
+          # Replace image tag
           sed -i "s|IMAGE_TAG|${IMAGE_TAG}|g" k8s/frontend-deployment.yaml
           sed -i "s|IMAGE_TAG|${IMAGE_TAG}|g" k8s/backend-deployment.yaml
-          echo "Deploying image tag: ${IMAGE_TAG}"
+          
+          # Replace registry owner if it differs from the default (kalviumcommunity)
+          sed -i "s|ghcr.io/kalviumcommunity|ghcr.io/${REGISTRY_OWNER}|g" k8s/frontend-deployment.yaml
+          sed -i "s|ghcr.io/kalviumcommunity|ghcr.io/${REGISTRY_OWNER}|g" k8s/backend-deployment.yaml
 
       - name: Apply Kubernetes manifests
         run: |
