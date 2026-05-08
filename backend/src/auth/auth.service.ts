@@ -47,17 +47,59 @@ export interface AuthService {
   logout(token: string): Promise<void>;
   verifyToken(token: string): Promise<AuthenticatedPatient>;
   refreshToken(refreshToken: string): Promise<AuthTokens>;
+  getPatientById(id: string): Promise<any>;
+  updatePatient(id: string, updates: any): Promise<any>;
 }
 
 const DEFAULT_SESSION_DURATION_SECONDS = 24 * 60 * 60;
 const DEFAULT_MAX_SESSIONS = 5;
 
+import fs from 'fs';
+import path from 'path';
+
 /**
  * Mock Auth Service for local development without MongoDB.
+ * Now with file-based persistence to survive restarts!
  */
 class MockAuthService implements AuthService {
   private patients: any[] = [];
   private sessions: any[] = [];
+  private readonly dataDir = path.join(process.cwd(), 'data');
+  private readonly patientsFile = path.join(this.dataDir, 'patients.json');
+  private readonly sessionsFile = path.join(this.dataDir, 'sessions.json');
+
+  constructor() {
+    this.ensureDataDir();
+    this.loadData();
+  }
+
+  private ensureDataDir() {
+    if (!fs.existsSync(this.dataDir)) {
+      fs.mkdirSync(this.dataDir, { recursive: true });
+    }
+  }
+
+  private loadData() {
+    try {
+      if (fs.existsSync(this.patientsFile)) {
+        this.patients = JSON.parse(fs.readFileSync(this.patientsFile, 'utf8'));
+      }
+      if (fs.existsSync(this.sessionsFile)) {
+        this.sessions = JSON.parse(fs.readFileSync(this.sessionsFile, 'utf8'));
+      }
+    } catch (error) {
+      console.error('Failed to load mock data:', error);
+    }
+  }
+
+  private saveData() {
+    try {
+      fs.writeFileSync(this.patientsFile, JSON.stringify(this.patients, null, 2));
+      fs.writeFileSync(this.sessionsFile, JSON.stringify(this.sessions, null, 2));
+    } catch (error) {
+      console.error('Failed to save mock data:', error);
+    }
+  }
 
   async register(input: RegisterInput): Promise<any> {
     const patient = {
@@ -68,6 +110,7 @@ class MockAuthService implements AuthService {
       updatedAt: new Date(),
     };
     this.patients.push(patient);
+    this.saveData();
     return patient;
   }
 
@@ -76,27 +119,55 @@ class MockAuthService implements AuthService {
     if (!patient) throw new AppError(401, 'INVALID_CREDENTIALS', 'Invalid email or password');
     
     const tokens = {
-      accessToken: 'mock-access-token-' + Math.random(),
-      refreshToken: 'mock-refresh-token-' + Math.random(),
+      accessToken: 'mock-access-token-' + Math.random().toString(36).substring(7),
+      refreshToken: 'mock-refresh-token-' + Math.random().toString(36).substring(7),
       expiresIn: 3600
     };
     this.sessions.push({ patientId: patient._id, ...tokens });
+    this.saveData();
     return { tokens, patient };
   }
 
   async logout(token: string): Promise<void> {
     this.sessions = this.sessions.filter(s => s.accessToken !== token);
+    this.saveData();
   }
 
   async verifyToken(token: string): Promise<AuthenticatedPatient> {
     const session = this.sessions.find(s => s.accessToken === token);
     if (!session) throw new AppError(401, 'UNAUTHORIZED', 'Invalid token');
-    const patient = this.patients.find(p => p._id.equals(session.patientId));
-    return { patientId: patient._id.toString(), email: patient.email };
+    const patient = this.patients.find(p => {
+      // Handle both string and ObjectId cases for the mock
+      const pId = p._id?.$oid || p._id;
+      const sId = session.patientId?.$oid || session.patientId;
+      return String(pId) === String(sId);
+    });
+    
+    if (!patient) throw new AppError(401, 'UNAUTHORIZED', 'Patient no longer exists');
+    return { patientId: String(patient._id?.$oid || patient._id), email: patient.email };
   }
 
   async refreshToken(refreshToken: string): Promise<AuthTokens> {
     return { accessToken: 'new-token', refreshToken: 'new-refresh', expiresIn: 3600 };
+  }
+
+  async getPatientById(id: string): Promise<any> {
+    const patient = this.patients.find(p => {
+      const pId = p._id?.$oid || p._id;
+      return String(pId) === String(id);
+    });
+    return patient;
+  }
+
+  async updatePatient(id: string, updates: any): Promise<any> {
+    const index = this.patients.findIndex(p => {
+      const pId = p._id?.$oid || p._id;
+      return String(pId) === String(id);
+    });
+    if (index === -1) throw new AppError(404, 'PATIENT_NOT_FOUND', 'Patient not found');
+    this.patients[index] = { ...this.patients[index], ...updates, updatedAt: new Date() };
+    this.saveData();
+    return this.patients[index];
   }
 }
 
@@ -187,6 +258,14 @@ export class DefaultAuthService implements AuthService {
     return tokens;
   }
 
+  async getPatientById(id: string): Promise<any> {
+    return this.dependencies.patientModel.findById(id).lean().exec();
+  }
+
+  async updatePatient(id: string, updates: any): Promise<any> {
+    return this.dependencies.patientModel.findByIdAndUpdate(id, updates, { new: true }).lean().exec();
+  }
+
   private async issueTokens(patient: PatientDocument): Promise<AuthTokens> {
     const payload: AuthenticatedPatient = {
       patientId: patient._id.toString(),
@@ -219,10 +298,19 @@ export class DefaultAuthService implements AuthService {
   }
 }
 
+let sharedAuthService: AuthService | null = null;
+
 export function createDefaultAuthService(): AuthService {
+  if (sharedAuthService) {
+    return sharedAuthService;
+  }
+
+  const registrarValue = String(process.env.SIMPLE_REGISTRAR).trim().toLowerCase();
+  
   // Use mock service if SIMPLE_REGISTRAR is enabled to avoid MongoDB dependency in local dev
-  if (process.env.SIMPLE_REGISTRAR === 'true') {
-    return new MockAuthService();
+  if (registrarValue === 'true') {
+    sharedAuthService = new MockAuthService();
+    return sharedAuthService;
   }
 
   const jwtSecret = process.env.JWT_SECRET;
@@ -232,7 +320,7 @@ export function createDefaultAuthService(): AuthService {
     throw new Error('JWT_SECRET and SESSION_SECRET are required to initialize auth service');
   }
 
-  return new DefaultAuthService({
+  sharedAuthService = new DefaultAuthService({
     patientModel: Patient,
     sessionModel: Session,
     bcryptLib: bcrypt,
@@ -240,4 +328,6 @@ export function createDefaultAuthService(): AuthService {
     jwtSecret,
     sessionSecret,
   });
+
+  return sharedAuthService;
 }

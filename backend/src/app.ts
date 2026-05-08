@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, Router } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { requestLogger } from './middleware/requestLogger';
@@ -25,25 +25,32 @@ app.use(express.json());
 // Attach requestId and log each request
 app.use(requestLogger);
 
+const authService = createDefaultAuthService();
+const authRoutes = createAuthRoutes(authService);
+
+const apiRouter = Router();
+
+// Authentication endpoints
+apiRouter.use('/auth', authRoutes);
+
+// Patient profile endpoints
+apiRouter.use('/patients', patientRoutes);
+
+// Appointment endpoints
+apiRouter.use('/appointments', appointmentRoutes);
+
+// Mount all routes under /api
+app.use('/api', apiRouter);
+
+// FALLBACK: Also allow /auth at the root level for compatibility
+app.use('/auth', authRoutes);
+
 // Health endpoints for Kubernetes probes
 app.use('/health', healthRoutes);
 
 // Prometheus metrics endpoint
 app.use('/metrics', metricsRoutes);
 
-// Authentication endpoints
-app.use('/auth', createAuthRoutes(createDefaultAuthService()));
-
-// Patient profile endpoints
-app.use('/patients', patientRoutes);
-
-// Appointment endpoints
-app.use('/appointments', appointmentRoutes);
-
-// Simple in-memory registrar (for quick local dev)
-if (process.env.SIMPLE_REGISTRAR === 'true') {
-  app.use('/api', simpleRegistrarRoutes);
-}
 // Placeholder health/root route
 app.get('/', (_req: Request, res: Response) => {
   res.json({ status: 'ok' });

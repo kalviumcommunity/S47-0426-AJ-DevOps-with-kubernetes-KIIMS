@@ -176,9 +176,103 @@ export class DefaultAppointmentService implements AppointmentService {
   }
 }
 
+import fs from 'fs';
+import path from 'path';
+
+export class MockAppointmentService implements AppointmentService {
+  private appointments: any[] = [];
+  private readonly dataDir = path.join(process.cwd(), 'data');
+  private readonly appointmentsFile = path.join(this.dataDir, 'appointments.json');
+
+  constructor() {
+    this.ensureDataDir();
+    this.loadData();
+  }
+
+  private ensureDataDir() {
+    if (!fs.existsSync(this.dataDir)) {
+      fs.mkdirSync(this.dataDir, { recursive: true });
+    }
+  }
+
+  private loadData() {
+    try {
+      if (fs.existsSync(this.appointmentsFile)) {
+        this.appointments = JSON.parse(fs.readFileSync(this.appointmentsFile, 'utf8'));
+      }
+    } catch (error) {
+      console.error('Failed to load mock appointments:', error);
+    }
+  }
+
+  private saveData() {
+    try {
+      fs.writeFileSync(this.appointmentsFile, JSON.stringify(this.appointments, null, 2));
+    } catch (error) {
+      console.error('Failed to save mock appointments:', error);
+    }
+  }
+
+  async getAvailableSlots(date: Date, specialty: string): Promise<AppointmentSlot[]> {
+    const slots: AppointmentSlot[] = [];
+    const baseSlotTimes = [9, 10, 11, 13, 14, 15, 16];
+    
+    for (const hour of baseSlotTimes) {
+      const startTime = new Date(date);
+      startTime.setHours(hour, 0, 0, 0);
+      
+      for (const duration of [30, 60]) {
+        slots.push({
+          doctorId: 'mock-doctor-id',
+          specialty,
+          startTime,
+          endTime: new Date(startTime.getTime() + duration * 60000),
+          available: true,
+        });
+      }
+    }
+    return slots;
+  }
+
+  async bookAppointment(input: AppointmentBookingInput): Promise<any> {
+    const appointment = {
+      _id: new Types.ObjectId().toString(),
+      ...input,
+      status: 'scheduled',
+      createdAt: new Date(),
+    };
+    this.appointments.push(appointment);
+    this.saveData();
+    return appointment;
+  }
+
+  async getAppointments(patientId: string): Promise<any[]> {
+    return this.appointments
+      .filter(a => a.patientId === patientId)
+      .sort((a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime());
+  }
+
+  async cancelAppointment(patientId: string, appointmentId: string): Promise<any> {
+    const appointment = this.appointments.find(a => a._id === appointmentId);
+    if (!appointment) throw new AppError(404, 'APPOINTMENT_NOT_FOUND', 'Appointment not found');
+    appointment.status = 'cancelled';
+    this.saveData();
+    return appointment;
+  }
+}
+
 export function createAppointmentService(dependencies: AppointmentServiceDependencies = {
   appointmentModel: Appointment,
   now: () => new Date(),
 }): AppointmentService {
+  const registrarValue = String(process.env.SIMPLE_REGISTRAR).trim().toLowerCase();
+  console.log(`[DEBUG] AppointmentService initialization. SIMPLE_REGISTRAR raw: "${process.env.SIMPLE_REGISTRAR}", processed: "${registrarValue}"`);
+  
+  if (registrarValue === 'true') {
+    console.log('[DEBUG] SUCCESS: Returning MockAppointmentService (No MongoDB)');
+    return new MockAppointmentService();
+  }
+  
+  console.log('[DEBUG] WARNING: Returning DefaultAppointmentService (Requires MongoDB)');
   return new DefaultAppointmentService(dependencies);
 }

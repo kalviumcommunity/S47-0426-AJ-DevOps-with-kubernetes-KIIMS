@@ -1,0 +1,13 @@
+[
+  {
+    "_id": "69fd7adcf5f61da8add52831",
+    "doctorId": "mock-doctor-id",
+    "specialty": "General Practice",
+    "scheduledAt": "2026-05-16T07:57:00.000Z",
+    "duration": 30,
+    "notes": "Im not sure baby",
+    "patientId": "69fd761b72ed432d71bc92a3",
+    "status": "scheduled",
+    "createdAt": "2026-05-08T05:55:40.952Z"
+  }
+]
