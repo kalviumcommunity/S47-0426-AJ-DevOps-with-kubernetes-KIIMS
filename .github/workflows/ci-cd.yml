@@ -8,10 +8,12 @@ on:
     branches:
       - main
       - finall
+      - fix-cicd-v2
   pull_request:
     branches:
       - main
       - finall
+      - fix-cicd-v2
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Environment variables shared across all jobs
@@ -101,8 +103,8 @@ jobs:
     needs: test                   # ← only runs if tests pass
 
     # Only build and push on merges to main, not on pull requests
-    # Only build and push on main or finall branches
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/finall')
+    # Only build and push on main, finall, or fix-cicd-v2 branches
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/finall' || github.ref == 'refs/heads/fix-cicd-v2')
 
     outputs:
       # Expose the image tag so the deploy job can reference the exact image
