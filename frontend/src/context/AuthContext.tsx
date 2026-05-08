@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { AuthPatient, LoginCredentials, RegisterCredentials, patientPortalAPI } from '../api/client';
+import { AuthPatient, LoginCredentials, RegisterCredentials, patientPortalAPI, setAccessToken } from '../api/client';
 
 interface AuthContextValue {
   user: AuthPatient | null;
@@ -47,16 +47,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function login(credentials: LoginCredentials): Promise<void> {
     const response = await patientPortalAPI.login(credentials);
+    const token = response.tokens?.accessToken || response.accessToken;
+    if (token) setAccessToken(token);
     setUser(response.patient);
   }
 
   async function register(credentials: RegisterCredentials): Promise<void> {
     const response = await patientPortalAPI.register(credentials);
+    const token = response.tokens?.accessToken || response.accessToken;
+    if (token) setAccessToken(token);
     setUser(response.patient);
   }
 
   async function logout(): Promise<void> {
     await patientPortalAPI.logout();
+    setAccessToken(null);
     setUser(null);
   }
 

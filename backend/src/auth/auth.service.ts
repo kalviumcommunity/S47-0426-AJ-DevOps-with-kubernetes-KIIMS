@@ -52,6 +52,54 @@ export interface AuthService {
 const DEFAULT_SESSION_DURATION_SECONDS = 24 * 60 * 60;
 const DEFAULT_MAX_SESSIONS = 5;
 
+/**
+ * Mock Auth Service for local development without MongoDB.
+ */
+class MockAuthService implements AuthService {
+  private patients: any[] = [];
+  private sessions: any[] = [];
+
+  async register(input: RegisterInput): Promise<any> {
+    const patient = {
+      _id: new Types.ObjectId(),
+      ...input,
+      email: input.email.toLowerCase(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.patients.push(patient);
+    return patient;
+  }
+
+  async login(input: LoginInput): Promise<{ tokens: AuthTokens; patient: any }> {
+    const patient = this.patients.find(p => p.email === input.email.toLowerCase());
+    if (!patient) throw new AppError(401, 'INVALID_CREDENTIALS', 'Invalid email or password');
+    
+    const tokens = {
+      accessToken: 'mock-access-token-' + Math.random(),
+      refreshToken: 'mock-refresh-token-' + Math.random(),
+      expiresIn: 3600
+    };
+    this.sessions.push({ patientId: patient._id, ...tokens });
+    return { tokens, patient };
+  }
+
+  async logout(token: string): Promise<void> {
+    this.sessions = this.sessions.filter(s => s.accessToken !== token);
+  }
+
+  async verifyToken(token: string): Promise<AuthenticatedPatient> {
+    const session = this.sessions.find(s => s.accessToken === token);
+    if (!session) throw new AppError(401, 'UNAUTHORIZED', 'Invalid token');
+    const patient = this.patients.find(p => p._id.equals(session.patientId));
+    return { patientId: patient._id.toString(), email: patient.email };
+  }
+
+  async refreshToken(refreshToken: string): Promise<AuthTokens> {
+    return { accessToken: 'new-token', refreshToken: 'new-refresh', expiresIn: 3600 };
+  }
+}
+
 export class DefaultAuthService implements AuthService {
   private readonly maxConcurrentSessions: number;
   private readonly sessionDurationSeconds: number;
@@ -172,6 +220,11 @@ export class DefaultAuthService implements AuthService {
 }
 
 export function createDefaultAuthService(): AuthService {
+  // Use mock service if SIMPLE_REGISTRAR is enabled to avoid MongoDB dependency in local dev
+  if (process.env.SIMPLE_REGISTRAR === 'true') {
+    return new MockAuthService();
+  }
+
   const jwtSecret = process.env.JWT_SECRET;
   const sessionSecret = process.env.SESSION_SECRET;
 
