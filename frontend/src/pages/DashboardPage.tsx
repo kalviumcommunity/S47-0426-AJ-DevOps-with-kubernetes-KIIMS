@@ -3,7 +3,6 @@ import { Link, Navigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { patientPortalAPI, Appointment } from '../api/client';
 import { useAuth } from '../context/AuthContext';
-import ErrorAlert from '../components/ErrorAlert';
 
 function formatDateTime(value: string): string {
   return new Date(value).toLocaleString([], {
