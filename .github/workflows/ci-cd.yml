@@ -165,11 +165,15 @@ jobs:
           version: "v1.34.1"
 
       - name: Configure kubectl credentials
-        # KUBE_CONFIG is a base64-encoded kubeconfig stored as a GitHub secret
+        shell: bash
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG }}
         run: |
           mkdir -p $HOME/.kube
-          printf "%s" "${{ secrets.KUBE_CONFIG }}" | base64 --decode > $HOME/.kube/config
+          echo "$KUBE_CONFIG_DATA" | base64 --decode > $HOME/.kube/config
           chmod 600 $HOME/.kube/config
+          # Verify the config is valid YAML and can be parsed by kubectl
+          kubectl config view > /dev/null || (echo "ERROR: Invalid kubeconfig" && exit 1)
 
       - name: Substitute image tag in Kubernetes manifests
         # Replace the placeholder IMAGE_TAG in the manifests with the actual
