@@ -82,6 +82,8 @@ export interface PatientPortalAPI {
   updateProfile(profile: Partial<PatientProfile>): Promise<PatientProfile>;
 }
 
+let accessToken: string | null = localStorage.getItem('auth_token');
+
 const api = axios.create({
   baseURL: '/api',
   withCredentials: true,
@@ -90,10 +92,27 @@ const api = axios.create({
   },
 });
 
+api.interceptors.request.use((config) => {
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
+  }
+  return config;
+});
+
+export function setAccessToken(token: string | null) {
+  accessToken = token;
+  if (token) {
+    localStorage.setItem('auth_token', token);
+  } else {
+    localStorage.removeItem('auth_token');
+  }
+}
+
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     if (error.response?.status === 401) {
+      setAccessToken(null);
       return Promise.reject(new Error('Your session expired. Please sign in again.'));
     }
 

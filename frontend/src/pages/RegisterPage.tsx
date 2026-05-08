@@ -61,88 +61,97 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="auth-shell auth-shell-alt">
-      <div className="auth-card">
-        <div className="auth-mark">New patient registration</div>
-        <h1>Create your account</h1>
-        <p>Set up secure access to the patient portal in a few minutes.</p>
+    <div className="page-shell">
+      <div className="mesh-bg"></div>
+      <div className="orb orb-1"></div>
+      <div className="orb orb-2"></div>
 
-        <form onSubmit={handleSubmit} noValidate>
-          <div className="grid-two">
-            <label>
-              First name
+      <div className="glass-card wide-card">
+        <div className="badge">Digital Onboarding</div>
+        <h1>Create Patient Profile</h1>
+        <p className="text-secondary mb-12">Join our elite healthcare network. Please provide your legal identification and contact details.</p>
+
+        <form onSubmit={handleSubmit} noValidate className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="input-group">
+              <span className="input-label">Legal First Name</span>
               <input
-                aria-label="First name"
+                placeholder="Anushka"
                 value={values.firstName}
                 onChange={(event) => setValues((current) => ({ ...current, firstName: event.target.value }))}
               />
-              {errors.firstName ? <span className="field-error">{errors.firstName}</span> : null}
-            </label>
-
-            <label>
-              Last name
+              {errors.firstName && <span className="text-accent text-sm mt-2 block">{errors.firstName}</span>}
+            </div>
+            <div className="input-group">
+              <span className="input-label">Legal Last Name</span>
               <input
-                aria-label="Last name"
+                placeholder="Poonia"
                 value={values.lastName}
                 onChange={(event) => setValues((current) => ({ ...current, lastName: event.target.value }))}
               />
-              {errors.lastName ? <span className="field-error">{errors.lastName}</span> : null}
-            </label>
+              {errors.lastName && <span className="text-accent text-sm mt-2 block">{errors.lastName}</span>}
+            </div>
           </div>
 
-          <label>
-            Email
-            <input
-              aria-label="Email"
-              type="email"
-              value={values.email}
-              onChange={(event) => setValues((current) => ({ ...current, email: event.target.value }))}
-            />
-            {errors.email ? <span className="field-error">{errors.email}</span> : null}
-          </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="input-group">
+              <span className="input-label">Email Address</span>
+              <input
+                placeholder="jane.doe@healthcare.com"
+                type="email"
+                value={values.email}
+                onChange={(event) => setValues((current) => ({ ...current, email: event.target.value }))}
+              />
+              {errors.email && <span className="text-accent text-sm mt-2 block">{errors.email}</span>}
+            </div>
+            <div className="input-group">
+              <span className="input-label">Mobile Number</span>
+              <input
+                placeholder="+918302575195"
+                value={values.phone}
+                onChange={(event) => setValues((current) => ({ ...current, phone: event.target.value }))}
+              />
+              {errors.phone && <span className="text-accent text-sm mt-2 block">{errors.phone}</span>}
+              <span className="text-[10px] text-secondary mt-1 uppercase tracking-widest block opacity-50">Requires E.164 format (e.g. +91...)</span>
+            </div>
+          </div>
 
-          <label>
-            Password
-            <input
-              aria-label="Password"
-              type="password"
-              value={values.password}
-              onChange={(event) => setValues((current) => ({ ...current, password: event.target.value }))}
-            />
-            {errors.password ? <span className="field-error">{errors.password}</span> : null}
-          </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="input-group">
+              <span className="input-label">Date of Birth</span>
+              <input
+                type="date"
+                value={values.dateOfBirth}
+                onChange={(event) => setValues((current) => ({ ...current, dateOfBirth: event.target.value }))}
+              />
+              {errors.dateOfBirth && <span className="text-accent text-sm mt-2 block">{errors.dateOfBirth}</span>}
+            </div>
+            <div className="input-group">
+              <span className="input-label">Secure Access Password</span>
+              <input
+                placeholder="••••••••"
+                type="password"
+                value={values.password}
+                onChange={(event) => setValues((current) => ({ ...current, password: event.target.value }))}
+              />
+              {errors.password && <span className="text-accent text-sm mt-2 block">{errors.password}</span>}
+            </div>
+          </div>
 
-          <label>
-            Date of birth
-            <input
-              aria-label="Date of birth"
-              type="date"
-              value={values.dateOfBirth}
-              onChange={(event) => setValues((current) => ({ ...current, dateOfBirth: event.target.value }))}
-            />
-            {errors.dateOfBirth ? <span className="field-error">{errors.dateOfBirth}</span> : null}
-          </label>
+          {errors.form && (
+            <div className="p-4 bg-accent/10 border border-accent/20 rounded-2xl text-accent flex items-center gap-3">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {errors.form}
+            </div>
+          )}
 
-          <label>
-            Phone
-            <input
-              aria-label="Phone"
-              value={values.phone}
-              placeholder="+12125551234"
-              onChange={(event) => setValues((current) => ({ ...current, phone: event.target.value }))}
-            />
-            {errors.phone ? <span className="field-error">{errors.phone}</span> : null}
-          </label>
-
-          {errors.form ? <div className="form-banner">{errors.form}</div> : null}
-
-          <button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Creating...' : 'Create account'}
+          <button type="submit" disabled={isSubmitting} className="btn-primary">
+            {isSubmitting ? 'Processing Registration...' : 'Establish Profile'}
           </button>
         </form>
 
-        <p className="auth-footer">
-          Already registered? <Link to="/login">Sign in</Link>
+        <p className="mt-12 text-center text-secondary text-sm">
+          Already registered? <Link to="/login" className="text-primary font-bold hover:underline">Sign in to session</Link>
         </p>
       </div>
     </div>
