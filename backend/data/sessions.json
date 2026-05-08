@@ -64,5 +64,11 @@
     "accessToken": "mock-access-token-323cuwu",
     "refreshToken": "mock-refresh-token-aykepe",
     "expiresIn": 3600
+  },
+  {
+    "patientId": "69fd761b72ed432d71bc92a3",
+    "accessToken": "mock-access-token-c41irm",
+    "refreshToken": "mock-refresh-token-85vkr4",
+    "expiresIn": 3600
   }
 ]
