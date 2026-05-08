@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.frontend.name }}
-  namespace: {{ .Release.Namespace }}
+  name: {{ include "patient-portal.frontend.fullname" . }}
   labels:
-    app: {{ .Values.frontend.name }}
+    {{- include "patient-portal.labels" . | nindent 4 }}
+    component: frontend
 spec:
   replicas: {{ .Values.frontend.replicaCount }}
   strategy:
@@ -14,19 +14,21 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: {{ .Values.frontend.name }}
+      {{- include "patient-portal.selectorLabels" . | nindent 6 }}
+      component: frontend
   template:
     metadata:
       labels:
-        app: {{ .Values.frontend.name }}
+        {{- include "patient-portal.selectorLabels" . | nindent 8 }}
+        component: frontend
     spec:
       containers:
-        - name: {{ .Values.frontend.name }}
+        - name: frontend
           image: "{{ .Values.image.repository }}/patient-portal-frontend:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: {{ .Values.config.name | default "patient-portal-config" }}
+                name: {{ .Values.config.name }}
           ports:
             - containerPort: {{ .Values.frontend.containerPort }}
           resources:

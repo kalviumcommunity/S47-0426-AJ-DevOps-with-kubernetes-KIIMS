@@ -2,13 +2,15 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ .Values.backend.name }}
-  namespace: {{ .Release.Namespace }}
+  name: {{ include "patient-portal.backend.fullname" . }}
+  labels:
+    {{- include "patient-portal.labels" . | nindent 4 }}
+    component: backend
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ .Values.backend.name }}
+    name: {{ include "patient-portal.backend.fullname" . }}
   minReplicas: {{ .Values.backend.hpa.minReplicas }}
   maxReplicas: {{ .Values.backend.hpa.maxReplicas }}
   metrics:
